@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Weatherly</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <main class="container">
+
+        <div class="weather-card">
+
+            <div class="header">
+                <h1>Weatherly</h1>
+                <p>Check the weather anywhere</p>
+            </div>
+
+
+            <form method="GET" class="search-form">
+
+                <input
+                    type="text"
+                    name="city"
+                    placeholder="Search for a city..."
+                    required
+                >
+
+                <button type="submit">
+                    Search
+                </button>
+
+            </form>
+
+
+            {% if weather %}
+
+            <div class="weather-result">
+
+                <p class="location">📍 {{ weather.city }}</p>
+
+
+                <div class="main-weather">
+
+                    <div class="weather-icon">
+                        {{ weather.icon }}
+                    </div>
+
+                    <div>
+
+                        <h2 class="temperature">
+                            {{ weather.temperature }}°C
+                        </h2>
+
+                        <p class="description">
+                            {{ weather.description }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="weather-details">
+
+                    <div class="detail-card">
+
+                        <span class="detail-icon">🌡️</span>
+
+                        <div>
+                            <p class="detail-label">Feels like</p>
+
+                            <p class="detail-value">
+                                {{ weather.feels_like }}°C
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-card">
+
+                        <span class="detail-icon">💧</span>
+
+                        <div>
+                            <p class="detail-label">Humidity</p>
+
+                            <p class="detail-value">
+                                {{ weather.humidity }}%
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-card">
+
+                        <span class="detail-icon">💨</span>
+
+                        <div>
+                            <p class="detail-label">Wind speed</p>
+
+                            <p class="detail-value">
+                                {{ weather.wind_speed }} m/s
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            {% if error %}
+
+            <p class="error">
+                {{ error }}
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>
