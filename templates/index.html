@@ -5,17 +5,16 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Weatherly</title>
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
@@ -31,7 +30,9 @@
 
             <div class="header">
 
-                <h1>Weatherly</h1>
+                <h1>
+                    Weatherly
+                </h1>
 
                 <p>
                     Check the weather anywhere
@@ -83,7 +84,7 @@
             ></p>
 
 
-            <!-- Recent searches -->
+            <!-- Recent Searches -->
 
             {% if recent_searches %}
 
@@ -137,12 +138,14 @@
             <div class="weather-result">
 
 
+                <!-- Location -->
+
                 <p class="location">
                     📍 {{ weather.city }}
                 </p>
 
 
-                <!-- Temperature toggle -->
+                <!-- Temperature Toggle -->
 
                 <div class="unit-toggle">
 
@@ -166,7 +169,7 @@
                 </div>
 
 
-                <!-- Main weather -->
+                <!-- Main Weather -->
 
                 <div class="main-weather">
 
@@ -195,10 +198,12 @@
                 </div>
 
 
-                <!-- Details -->
+                <!-- Weather Details -->
 
                 <div class="weather-details">
 
+
+                    <!-- Feels Like -->
 
                     <div class="detail-card">
 
@@ -227,6 +232,8 @@
                     </div>
 
 
+                    <!-- Humidity -->
+
                     <div class="detail-card">
 
                         <span class="detail-icon">
@@ -249,6 +256,8 @@
 
                     </div>
 
+
+                    <!-- Wind -->
 
                     <div class="detail-card">
 
@@ -278,7 +287,7 @@
             </div>
 
 
-            <!-- Forecast -->
+            <!-- 5-Day Forecast -->
 
             {% if forecast %}
 
@@ -337,6 +346,26 @@
 
             </div>
 
+
+            <!-- Temperature Chart -->
+
+            <div class="chart-section">
+
+                <h2 class="chart-title">
+                    Temperature Trend
+                </h2>
+
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="temperature-chart"
+                    ></canvas>
+
+                </div>
+
+            </div>
+
             {% endif %}
 
             {% endif %}
@@ -360,15 +389,18 @@
 
     <script>
 
+
         // ---------------------------------------------
-        // Search loading state
+        // Search Loading State
         // ---------------------------------------------
 
         const form =
             document.getElementById("search-form");
 
+
         const loading =
             document.getElementById("loading");
+
 
         const searchButton =
             document.getElementById("search-button");
@@ -396,6 +428,7 @@
         const locationButton =
             document.getElementById("location-button");
 
+
         const locationStatus =
             document.getElementById("location-status");
 
@@ -410,10 +443,12 @@
                         "Location services are not supported by your browser.";
 
                     return;
+
                 }
 
 
                 locationButton.disabled = true;
+
 
                 locationButton.textContent =
                     "📍 Finding your location...";
@@ -429,6 +464,7 @@
 
                         const latitude =
                             position.coords.latitude;
+
 
                         const longitude =
                             position.coords.longitude;
@@ -450,6 +486,7 @@
                     function (error) {
 
                         locationButton.disabled = false;
+
 
                         locationButton.textContent =
                             "📍 Use My Location";
@@ -497,6 +534,7 @@
 
         const celsiusButton =
             document.getElementById("celsius-button");
+
 
         const fahrenheitButton =
             document.getElementById("fahrenheit-button");
@@ -548,6 +586,15 @@
             );
 
 
+            // Update chart too
+
+            if (window.temperatureChart) {
+
+                updateChartUnit(unit);
+
+            }
+
+
             if (unit === "C") {
 
                 celsiusButton.classList.add("active");
@@ -585,6 +632,296 @@
 
             }
         );
+
+
+        // ---------------------------------------------
+        // Temperature Chart
+        // ---------------------------------------------
+
+        const chartCanvas =
+            document.getElementById(
+                "temperature-chart"
+            );
+
+
+        let chartHighTemperatures = [];
+
+        let chartLowTemperatures = [];
+
+
+        if (chartCanvas) {
+
+
+            const forecastData = [
+
+                {% for day in forecast %}
+
+                {
+                    date: "{{ day.date }}",
+
+                    high: {{ day.high }},
+
+                    low: {{ day.low }}
+
+                }
+
+                {% if not loop.last %},{% endif %}
+
+                {% endfor %}
+
+            ];
+
+
+            const chartLabels =
+                forecastData.map(
+                    function (day) {
+
+                        return day.date;
+
+                    }
+                );
+
+
+            chartHighTemperatures =
+                forecastData.map(
+                    function (day) {
+
+                        return day.high;
+
+                    }
+                );
+
+
+            chartLowTemperatures =
+                forecastData.map(
+                    function (day) {
+
+                        return day.low;
+
+                    }
+                );
+
+            const chartTextColor =
+                document.body.classList.contains("weather-clouds") ||
+                document.body.classList.contains("weather-snow") ||
+                document.body.classList.contains("weather-mist") ||
+                document.body.classList.contains("weather-fog") ||
+                document.body.classList.contains("weather-haze")
+                    ? "#222"
+                    : "white";
+                window.temperatureChart =
+                new Chart(
+                    chartCanvas,
+                    {
+
+                        type: "line",
+
+
+                        data: {
+
+                            labels: chartLabels,
+
+
+                            datasets: [
+
+                                {
+
+                                    label: "High",
+
+                                    data:
+                                        chartHighTemperatures,
+
+                                    tension: 0.4,
+
+                                    borderWidth: 3,
+
+                                    pointRadius: 4
+
+                                },
+
+
+                                {
+
+                                    label: "Low",
+
+                                    data:
+                                        chartLowTemperatures,
+
+                                    tension: 0.4,
+
+                                    borderWidth: 3,
+
+                                    pointRadius: 4
+
+                                }
+
+                            ]
+
+                        },
+
+
+                        options: {
+
+                            responsive: true,
+
+                            maintainAspectRatio: false,
+
+
+                            plugins: {
+
+                                legend: {
+
+                                    labels: {
+
+                                        color: chartTextColor
+
+                                    }
+
+                                }
+
+                            },
+
+
+                            scales: {
+
+                                x: {
+
+                                    ticks: {
+
+                                        color: "white"
+
+                                    },
+
+
+                                    grid: {
+
+                                        color: chartTextColor === "#222"
+                                             ? "rgba(0,0,0,0.15)"
+                                             : "rgba(255,255,255,0.15)"
+                                            
+                                    }
+
+                                },
+
+
+                                y: {
+
+                                    ticks: {
+
+                                        color: "white",
+
+
+                                        callback:
+                                            function (value) {
+
+                                                return value + "°C";
+
+                                            }
+
+                                    },
+
+
+                                    grid: {
+
+                                        color:
+                                            "rgba(255,255,255,0.15)"
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                );
+
+        }
+
+
+        // ---------------------------------------------
+        // Update Chart Units
+        // ---------------------------------------------
+
+        function updateChartUnit(unit) {
+
+            if (!window.temperatureChart) {
+
+                return;
+
+            }
+
+
+            let highData =
+                chartHighTemperatures;
+
+
+            let lowData =
+                chartLowTemperatures;
+
+
+            let unitLabel =
+                "°C";
+
+
+            if (unit === "F") {
+
+                highData =
+                    chartHighTemperatures.map(
+                        function (temperature) {
+
+                            return Math.round(
+                                celsiusToFahrenheit(
+                                    temperature
+                                )
+                            );
+
+                        }
+                    );
+
+
+                lowData =
+                    chartLowTemperatures.map(
+                        function (temperature) {
+
+                            return Math.round(
+                                celsiusToFahrenheit(
+                                    temperature
+                                )
+                            );
+
+                        }
+                    );
+
+
+                unitLabel =
+                    "°F";
+
+            }
+
+
+            window.temperatureChart.data.datasets[0].data =
+                highData;
+
+
+            window.temperatureChart.data.datasets[1].data =
+                lowData;
+
+
+            window.temperatureChart.options.scales.y.ticks.callback =
+                function (value) {
+
+                    return value + unitLabel;
+
+                };
+
+
+            window.temperatureChart.update();
+
+        }
+
 
     </script>
 
