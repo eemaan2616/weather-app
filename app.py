@@ -1,4 +1,5 @@
 import os
+import sqlite3
 from datetime import datetime, date, timedelta
 
 import requests
@@ -14,6 +15,8 @@ API_KEY = os.getenv("WEATHER_API_KEY")
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast"
 
+DATABASE = "weather.db"
+
 
 WEATHER_ICONS = {
     "Clear": "☀️",
@@ -28,32 +31,138 @@ WEATHER_ICONS = {
 }
 
 
-# Store recent searches while the app is running
-recent_searches = []
+# ------------------------------------------------
+# DATABASE
+# ------------------------------------------------
+
+def get_db_connection():
+
+    connection = sqlite3.connect(DATABASE)
+
+    connection.row_factory = sqlite3.Row
+
+    return connection
 
 
-def get_weather(city):
-    """Get current weather and forecast for a city."""
+def init_database():
+
+    connection = get_db_connection()
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS recent_searches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            city TEXT UNIQUE NOT NULL,
+            searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    connection.commit()
+
+    connection.close()
+
+
+def add_recent_search(city):
+
+    connection = get_db_connection()
+
+    # Remove the city first so it can become the newest search
+    connection.execute(
+        "DELETE FROM recent_searches WHERE city = ?",
+        (city,)
+    )
+
+    connection.execute(
+        "INSERT INTO recent_searches (city) VALUES (?)",
+        (city,)
+    )
+
+    # Keep only the 5 most recent searches
+    connection.execute("""
+        DELETE FROM recent_searches
+        WHERE id NOT IN (
+            SELECT id
+            FROM recent_searches
+            ORDER BY searched_at DESC, id DESC
+            LIMIT 5
+        )
+    """)
+
+    connection.commit()
+
+    connection.close()
+
+
+def get_recent_searches():
+
+    connection = get_db_connection()
+
+    rows = connection.execute("""
+        SELECT city
+        FROM recent_searches
+        ORDER BY searched_at DESC, id DESC
+        LIMIT 5
+    """).fetchall()
+
+    connection.close()
+
+    return [row["city"] for row in rows]
+
+
+# ------------------------------------------------
+# WEATHER
+# ------------------------------------------------
+
+def get_weather(city=None, latitude=None, longitude=None):
 
     params = {
-        "q": city,
         "appid": API_KEY,
         "units": "metric"
     }
 
+    if city:
+
+        params["q"] = city
+
+    elif latitude is not None and longitude is not None:
+
+        params["lat"] = latitude
+        params["lon"] = longitude
+
+    else:
+
+        return None, [], "No location was provided."
+
+
     try:
-        # Get current weather
+
+        # ------------------------------------------------
+        # CURRENT WEATHER
+        # ------------------------------------------------
+
         response = requests.get(
             BASE_URL,
             params=params,
             timeout=10
         )
 
+
         if response.status_code == 404:
-            return None, [], f'We could not find "{city}". Please check the spelling.'
+
+            return (
+                None,
+                [],
+                f'We could not find "{city}". Please check the spelling.'
+            )
+
 
         if response.status_code == 401:
-            return None, [], "There is a problem with the weather API key."
+
+            return (
+                None,
+                [],
+                "There is a problem with the weather API key."
+            )
+
 
         response.raise_for_status()
 
@@ -61,18 +170,42 @@ def get_weather(city):
 
         condition = data["weather"][0]["main"]
 
+
         weather = {
+
             "city": data["name"],
-            "temperature": round(data["main"]["temp"]),
-            "feels_like": round(data["main"]["feels_like"]),
+
+            "temperature": round(
+                data["main"]["temp"]
+            ),
+
+            "feels_like": round(
+                data["main"]["feels_like"]
+            ),
+
             "humidity": data["main"]["humidity"],
-            "wind_speed": round(data["wind"]["speed"], 1),
+
+            "wind_speed": round(
+                data["wind"]["speed"],
+                1
+            ),
+
             "description": data["weather"][0]["description"],
-            "icon": WEATHER_ICONS.get(condition, "🌤️")
+
+            "condition": condition,
+
+            "icon": WEATHER_ICONS.get(
+                condition,
+                "🌤️"
+            )
+
         }
 
 
-        # Get forecast
+        # ------------------------------------------------
+        # 5-DAY FORECAST
+        # ------------------------------------------------
+
         forecast_response = requests.get(
             FORECAST_URL,
             params=params,
@@ -81,61 +214,129 @@ def get_weather(city):
 
         forecast = []
 
+
         if forecast_response.status_code == 200:
 
             forecast_data = forecast_response.json()
 
-            daily_forecast = {}
+            daily_data = {}
+
 
             for item in forecast_data["list"]:
 
-                date_time = item["dt_txt"]
+                date_string = item["dt_txt"].split(" ")[0]
 
-                if "12:00:00" in date_time:
-
-                    date_string = date_time.split(" ")[0]
-
-                    forecast_date = datetime.strptime(
-                        date_string,
-                        "%Y-%m-%d"
-                    ).date()
+                forecast_date = datetime.strptime(
+                    date_string,
+                    "%Y-%m-%d"
+                ).date()
 
 
-                    if forecast_date == date.today():
-
-                        display_date = "Today"
-
-                    elif forecast_date == date.today() + timedelta(days=1):
-
-                        display_date = "Tomorrow"
-
-                    else:
-
-                        display_date = forecast_date.strftime("%A")
+                # Ignore today
+                if forecast_date <= date.today():
+                    continue
 
 
-                    condition = item["weather"][0]["main"]
+                if date_string not in daily_data:
 
-                    daily_forecast[date_string] = {
+                    daily_data[date_string] = {
 
-                        "date": display_date,
+                        "date": forecast_date,
 
-                        "temperature": round(
-                            item["main"]["temp"]
-                        ),
+                        "temperatures": [],
 
-                        "description": item["weather"][0]["description"],
+                        "descriptions": [],
 
-                        "icon": WEATHER_ICONS.get(
-                            condition,
-                            "🌤️"
-                        )
+                        "conditions": []
+
                     }
 
 
-            forecast = list(
-                daily_forecast.values()
-            )[:5]
+                daily_data[date_string]["temperatures"].append(
+                    item["main"]["temp"]
+                )
+
+
+                daily_data[date_string]["descriptions"].append(
+                    item["weather"][0]["description"]
+                )
+
+
+                daily_data[date_string]["conditions"].append(
+                    item["weather"][0]["main"]
+                )
+
+
+            sorted_days = sorted(
+                daily_data.values(),
+                key=lambda day: day["date"]
+            )
+
+
+            for day_data in sorted_days[:5]:
+
+                forecast_date = day_data["date"]
+
+
+                if forecast_date == date.today() + timedelta(days=1):
+
+                    display_date = "Tomorrow"
+
+                else:
+
+                    display_date = forecast_date.strftime(
+                        "%A"
+                    )
+
+
+                high_temperature = max(
+                    day_data["temperatures"]
+                )
+
+
+                low_temperature = min(
+                    day_data["temperatures"]
+                )
+
+
+                conditions = day_data["conditions"]
+
+                most_common_condition = max(
+                    set(conditions),
+                    key=conditions.count
+                )
+
+
+                descriptions = day_data["descriptions"]
+
+                most_common_description = max(
+                    set(descriptions),
+                    key=descriptions.count
+                )
+
+
+                forecast.append({
+
+                    "date": display_date,
+
+                    "high": round(
+                        high_temperature
+                    ),
+
+                    "low": round(
+                        low_temperature
+                    ),
+
+                    "description": most_common_description,
+
+                    "condition": most_common_condition,
+
+                    "icon": WEATHER_ICONS.get(
+                        most_common_condition,
+                        "🌤️"
+                    )
+
+                })
 
 
         return weather, forecast, None
@@ -143,23 +344,43 @@ def get_weather(city):
 
     except requests.exceptions.Timeout:
 
-        return None, [], "The weather service took too long to respond."
+        return (
+            None,
+            [],
+            "The weather service took too long to respond."
+        )
 
 
     except requests.exceptions.ConnectionError:
 
-        return None, [], "Could not connect to the weather service."
+        return (
+            None,
+            [],
+            "Could not connect to the weather service."
+        )
 
 
     except requests.exceptions.RequestException:
 
-        return None, [], "Something went wrong while fetching the weather."
+        return (
+            None,
+            [],
+            "Something went wrong while fetching the weather."
+        )
 
+
+# ------------------------------------------------
+# HOME PAGE
+# ------------------------------------------------
 
 @app.route("/")
 def home():
 
-    city = request.args.get("city", "").strip()
+    city = request.args.get(
+        "city",
+        ""
+    ).strip()
+
 
     weather = None
     forecast = []
@@ -168,22 +389,19 @@ def home():
 
     if city:
 
-        weather, forecast, error = get_weather(city)
+        weather, forecast, error = get_weather(
+            city=city
+        )
 
 
-        # Add successful searches to recent searches
         if weather:
 
-            city_name = weather["city"]
+            add_recent_search(
+                weather["city"]
+            )
 
-            if city_name in recent_searches:
 
-                recent_searches.remove(city_name)
-
-            recent_searches.insert(0, city_name)
-
-            # Keep only the latest 5 searches
-            del recent_searches[5:]
+    recent_searches = get_recent_searches()
 
 
     return render_template(
@@ -201,6 +419,76 @@ def home():
         error=error
 
     )
+
+
+# ------------------------------------------------
+# LOCATION
+# ------------------------------------------------
+
+@app.route("/location")
+def location():
+
+    latitude = request.args.get("lat")
+    longitude = request.args.get("lon")
+
+
+    if not latitude or not longitude:
+
+        return render_template(
+
+            "index.html",
+
+            city="",
+
+            weather=None,
+
+            forecast=[],
+
+            recent_searches=get_recent_searches(),
+
+            error="Could not determine your location."
+
+        )
+
+
+    weather, forecast, error = get_weather(
+
+        latitude=latitude,
+
+        longitude=longitude
+
+    )
+
+
+    if weather:
+
+        add_recent_search(
+            weather["city"]
+        )
+
+
+    return render_template(
+
+        "index.html",
+
+        city="",
+
+        weather=weather,
+
+        forecast=forecast,
+
+        recent_searches=get_recent_searches(),
+
+        error=error
+
+    )
+
+
+# ------------------------------------------------
+# START APPLICATION
+# ------------------------------------------------
+
+init_database()
 
 
 if __name__ == "__main__":

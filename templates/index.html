@@ -2,30 +2,51 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Weatherly</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
 </head>
 
-<body>
+
+<body class="{% if weather %}weather-{{ weather.condition|lower }}{% endif %}">
 
     <main class="container">
 
         <div class="weather-card">
 
+
+            <!-- Header -->
+
             <div class="header">
+
                 <h1>Weatherly</h1>
-                <p>Check the weather anywhere</p>
+
+                <p>
+                    Check the weather anywhere
+                </p>
+
             </div>
 
 
-            <!-- Search form -->
+            <!-- Search -->
 
-            <form method="GET" class="search-form" id="search-form">
+            <form
+                method="GET"
+                class="search-form"
+                id="search-form"
+            >
 
                 <input
                     type="text"
@@ -35,11 +56,31 @@
                     required
                 >
 
-                <button type="submit" id="search-button">
+                <button
+                    type="submit"
+                    id="search-button"
+                >
                     Search
                 </button>
 
             </form>
+
+
+            <!-- Location -->
+
+            <button
+                type="button"
+                class="location-button"
+                id="location-button"
+            >
+                📍 Use My Location
+            </button>
+
+
+            <p
+                class="location-status"
+                id="location-status"
+            ></p>
 
 
             <!-- Recent searches -->
@@ -51,6 +92,7 @@
                 <p class="recent-title">
                     Recent searches
                 </p>
+
 
                 <div class="recent-list">
 
@@ -72,27 +114,59 @@
             {% endif %}
 
 
-            <!-- Loading state -->
+            <!-- Loading -->
 
-            <div class="loading" id="loading">
+            <div
+                class="loading"
+                id="loading"
+            >
 
                 <div class="spinner"></div>
 
-                <p>Fetching the latest weather...</p>
+                <p>
+                    Fetching the latest weather...
+                </p>
 
             </div>
 
 
-            <!-- Current weather -->
+            <!-- Weather -->
 
             {% if weather %}
 
             <div class="weather-result">
 
+
                 <p class="location">
                     📍 {{ weather.city }}
                 </p>
 
+
+                <!-- Temperature toggle -->
+
+                <div class="unit-toggle">
+
+                    <button
+                        type="button"
+                        class="unit-button active"
+                        id="celsius-button"
+                    >
+                        °C
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="unit-button"
+                        id="fahrenheit-button"
+                    >
+                        °F
+                    </button>
+
+                </div>
+
+
+                <!-- Main weather -->
 
                 <div class="main-weather">
 
@@ -100,11 +174,17 @@
                         {{ weather.icon }}
                     </div>
 
+
                     <div>
 
-                        <h2 class="temperature">
+                        <h2
+                            class="temperature"
+                            id="main-temperature"
+                            data-celsius="{{ weather.temperature }}"
+                        >
                             {{ weather.temperature }}°C
                         </h2>
+
 
                         <p class="description">
                             {{ weather.description }}
@@ -115,9 +195,10 @@
                 </div>
 
 
-                <!-- Weather details -->
+                <!-- Details -->
 
                 <div class="weather-details">
+
 
                     <div class="detail-card">
 
@@ -125,13 +206,19 @@
                             🌡️
                         </span>
 
+
                         <div>
 
                             <p class="detail-label">
                                 Feels like
                             </p>
 
-                            <p class="detail-value">
+
+                            <p
+                                class="detail-value"
+                                id="feels-like"
+                                data-celsius="{{ weather.feels_like }}"
+                            >
                                 {{ weather.feels_like }}°C
                             </p>
 
@@ -146,11 +233,13 @@
                             💧
                         </span>
 
+
                         <div>
 
                             <p class="detail-label">
                                 Humidity
                             </p>
+
 
                             <p class="detail-value">
                                 {{ weather.humidity }}%
@@ -167,11 +256,13 @@
                             💨
                         </span>
 
+
                         <div>
 
                             <p class="detail-label">
                                 Wind speed
                             </p>
+
 
                             <p class="detail-value">
                                 {{ weather.wind_speed }} m/s
@@ -180,6 +271,7 @@
                         </div>
 
                     </div>
+
 
                 </div>
 
@@ -207,13 +299,31 @@
                             {{ day.date }}
                         </p>
 
+
                         <div class="forecast-icon">
                             {{ day.icon }}
                         </div>
 
-                        <p class="forecast-temp">
-                            {{ day.temperature }}°C
-                        </p>
+
+                        <div class="forecast-temperatures">
+
+                            <span
+                                class="forecast-high"
+                                data-celsius="{{ day.high }}"
+                            >
+                                {{ day.high }}°C
+                            </span>
+
+
+                            <span
+                                class="forecast-low"
+                                data-celsius="{{ day.low }}"
+                            >
+                                {{ day.low }}°C
+                            </span>
+
+                        </div>
+
 
                         <p class="forecast-description">
                             {{ day.description }}
@@ -232,7 +342,7 @@
             {% endif %}
 
 
-            <!-- Error message -->
+            <!-- Error -->
 
             {% if error %}
 
@@ -242,31 +352,239 @@
 
             {% endif %}
 
+
         </div>
 
     </main>
 
 
-    <!-- Loading JavaScript -->
-
     <script>
 
-        const form = document.getElementById("search-form");
+        // ---------------------------------------------
+        // Search loading state
+        // ---------------------------------------------
 
-        const loading = document.getElementById("loading");
+        const form =
+            document.getElementById("search-form");
 
-        const button = document.getElementById("search-button");
+        const loading =
+            document.getElementById("loading");
+
+        const searchButton =
+            document.getElementById("search-button");
 
 
-        form.addEventListener("submit", function () {
+        form.addEventListener(
+            "submit",
+            function () {
 
-            loading.classList.add("show");
+                loading.classList.add("show");
 
-            button.disabled = true;
+                searchButton.disabled = true;
 
-            button.textContent = "Searching...";
+                searchButton.textContent =
+                    "Searching...";
 
-        });
+            }
+        );
+
+
+        // ---------------------------------------------
+        // Use My Location
+        // ---------------------------------------------
+
+        const locationButton =
+            document.getElementById("location-button");
+
+        const locationStatus =
+            document.getElementById("location-status");
+
+
+        locationButton.addEventListener(
+            "click",
+            function () {
+
+                if (!navigator.geolocation) {
+
+                    locationStatus.textContent =
+                        "Location services are not supported by your browser.";
+
+                    return;
+                }
+
+
+                locationButton.disabled = true;
+
+                locationButton.textContent =
+                    "📍 Finding your location...";
+
+
+                locationStatus.textContent =
+                    "Please allow location access in your browser.";
+
+
+                navigator.geolocation.getCurrentPosition(
+
+                    function (position) {
+
+                        const latitude =
+                            position.coords.latitude;
+
+                        const longitude =
+                            position.coords.longitude;
+
+
+                        locationStatus.textContent =
+                            "Location found! Getting your weather...";
+
+
+                        loading.classList.add("show");
+
+
+                        window.location.href =
+                            `/location?lat=${latitude}&lon=${longitude}`;
+
+                    },
+
+
+                    function (error) {
+
+                        locationButton.disabled = false;
+
+                        locationButton.textContent =
+                            "📍 Use My Location";
+
+
+                        if (error.code === 1) {
+
+                            locationStatus.textContent =
+                                "Location access was denied.";
+
+                        }
+
+                        else if (error.code === 2) {
+
+                            locationStatus.textContent =
+                                "Your location could not be determined.";
+
+                        }
+
+                        else if (error.code === 3) {
+
+                            locationStatus.textContent =
+                                "Location request timed out. Please try again.";
+
+                        }
+
+                        else {
+
+                            locationStatus.textContent =
+                                "Something went wrong while getting your location.";
+
+                        }
+
+                    }
+
+                );
+
+            }
+        );
+
+
+        // ---------------------------------------------
+        // Celsius / Fahrenheit
+        // ---------------------------------------------
+
+        const celsiusButton =
+            document.getElementById("celsius-button");
+
+        const fahrenheitButton =
+            document.getElementById("fahrenheit-button");
+
+
+        const temperatureElements =
+            document.querySelectorAll(
+                "[data-celsius]"
+            );
+
+
+        function celsiusToFahrenheit(celsius) {
+
+            return (celsius * 9 / 5) + 32;
+
+        }
+
+
+        function updateTemperatures(unit) {
+
+            temperatureElements.forEach(
+                function (element) {
+
+                    const celsius =
+                        Number(
+                            element.dataset.celsius
+                        );
+
+
+                    if (unit === "F") {
+
+                        const fahrenheit =
+                            celsiusToFahrenheit(celsius);
+
+
+                        element.textContent =
+                            `${Math.round(fahrenheit)}°F`;
+
+                    }
+
+                    else {
+
+                        element.textContent =
+                            `${Math.round(celsius)}°C`;
+
+                    }
+
+                }
+            );
+
+
+            if (unit === "C") {
+
+                celsiusButton.classList.add("active");
+
+                fahrenheitButton.classList.remove("active");
+
+            }
+
+            else {
+
+                fahrenheitButton.classList.add("active");
+
+                celsiusButton.classList.remove("active");
+
+            }
+
+        }
+
+
+        celsiusButton.addEventListener(
+            "click",
+            function () {
+
+                updateTemperatures("C");
+
+            }
+        );
+
+
+        fahrenheitButton.addEventListener(
+            "click",
+            function () {
+
+                updateTemperatures("F");
+
+            }
+        );
 
     </script>
 
