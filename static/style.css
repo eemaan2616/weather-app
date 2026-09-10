@@ -26,7 +26,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 500px;
+    max-width: 750px;
 }
 
 
@@ -47,14 +47,18 @@ body {
 }
 
 
+/* Header */
+
 .header {
     text-align: center;
+
     margin-bottom: 30px;
 }
 
 
 .header h1 {
     font-size: 2.5rem;
+
     margin-bottom: 8px;
 }
 
@@ -64,11 +68,14 @@ body {
 }
 
 
+/* Search */
+
 .search-form {
     display: flex;
+
     gap: 10px;
 
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 
@@ -76,6 +83,7 @@ body {
     flex: 1;
 
     border: none;
+
     outline: none;
 
     padding: 15px;
@@ -96,6 +104,7 @@ body {
     cursor: pointer;
 
     font-size: 1rem;
+
     font-weight: bold;
 
     background-color: white;
@@ -104,10 +113,116 @@ body {
 }
 
 
-.search-form button:hover {
+.search-form button:hover:not(:disabled) {
     transform: translateY(-2px);
 }
 
+
+.search-form button:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.7;
+}
+
+
+/* Recent searches */
+
+.recent-searches {
+    margin-bottom: 25px;
+}
+
+
+.recent-title {
+    font-size: 0.85rem;
+
+    opacity: 0.8;
+
+    margin-bottom: 10px;
+}
+
+
+.recent-list {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+
+.recent-city {
+    text-decoration: none;
+
+    color: white;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    padding: 7px 12px;
+
+    border-radius: 20px;
+
+    font-size: 0.8rem;
+
+    transition: 0.3s;
+}
+
+
+.recent-city:hover {
+    background: rgba(255, 255, 255, 0.25);
+
+    transform: translateY(-2px);
+}
+
+
+/* Loading state */
+
+.loading {
+    display: none;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin: 25px 0;
+
+    opacity: 0.9;
+}
+
+
+.loading.show {
+    display: flex;
+}
+
+
+.spinner {
+    width: 35px;
+
+    height: 35px;
+
+    border: 4px solid rgba(255, 255, 255, 0.3);
+
+    border-top-color: white;
+
+    border-radius: 50%;
+
+    animation: spin 0.8s linear infinite;
+}
+
+
+@keyframes spin {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* Current weather */
 
 .weather-result {
     text-align: center;
@@ -116,6 +231,7 @@ body {
 
 .location {
     font-size: 1.2rem;
+
     margin-bottom: 20px;
 }
 
@@ -124,6 +240,7 @@ body {
     display: flex;
 
     justify-content: center;
+
     align-items: center;
 
     gap: 20px;
@@ -149,6 +266,8 @@ body {
 }
 
 
+/* Current weather detail cards */
+
 .weather-details {
     display: grid;
 
@@ -168,7 +287,9 @@ body {
     border-radius: 15px;
 
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
 
     transition: 0.3s;
@@ -203,6 +324,93 @@ body {
 }
 
 
+/* Forecast section */
+
+.forecast-section {
+    margin-top: 40px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+
+    padding-top: 30px;
+}
+
+
+.forecast-title {
+    text-align: center;
+
+    font-size: 1.5rem;
+
+    margin-bottom: 20px;
+}
+
+
+.forecast-container {
+    display: grid;
+
+    grid-template-columns: repeat(5, 1fr);
+
+    gap: 12px;
+}
+
+
+.forecast-card {
+    background: rgba(255, 255, 255, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    border-radius: 16px;
+
+    padding: 15px 8px;
+
+    text-align: center;
+
+    transition: 0.3s;
+}
+
+
+.forecast-card:hover {
+    transform: translateY(-5px);
+
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
+.forecast-date {
+    font-size: 0.75rem;
+
+    margin-bottom: 10px;
+
+    opacity: 0.8;
+}
+
+
+.forecast-icon {
+    font-size: 2rem;
+
+    margin-bottom: 10px;
+}
+
+
+.forecast-temp {
+    font-size: 1.1rem;
+
+    font-weight: bold;
+
+    margin-bottom: 5px;
+}
+
+
+.forecast-description {
+    font-size: 0.7rem;
+
+    text-transform: capitalize;
+
+    opacity: 0.75;
+}
+
+
+/* Error message */
+
 .error {
     text-align: center;
 
@@ -211,12 +419,14 @@ body {
     padding: 15px;
 
     border-radius: 12px;
+
+    margin-top: 20px;
 }
 
 
-/* Responsive design for phones */
+/* Responsive design */
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
 
     .weather-card {
         padding: 25px 20px;
@@ -229,6 +439,20 @@ body {
 
 
     .weather-details {
+        grid-template-columns: 1fr;
+    }
+
+
+    .forecast-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 400px) {
+
+    .forecast-container {
         grid-template-columns: 1fr;
     }
 

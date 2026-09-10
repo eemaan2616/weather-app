@@ -23,27 +23,75 @@
             </div>
 
 
-            <form method="GET" class="search-form">
+            <!-- Search form -->
+
+            <form method="GET" class="search-form" id="search-form">
 
                 <input
                     type="text"
                     name="city"
                     placeholder="Search for a city..."
+                    value="{{ city }}"
                     required
                 >
 
-                <button type="submit">
+                <button type="submit" id="search-button">
                     Search
                 </button>
 
             </form>
 
 
+            <!-- Recent searches -->
+
+            {% if recent_searches %}
+
+            <div class="recent-searches">
+
+                <p class="recent-title">
+                    Recent searches
+                </p>
+
+                <div class="recent-list">
+
+                    {% for recent_city in recent_searches %}
+
+                    <a
+                        href="{{ url_for('home', city=recent_city) }}"
+                        class="recent-city"
+                    >
+                        {{ recent_city }}
+                    </a>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- Loading state -->
+
+            <div class="loading" id="loading">
+
+                <div class="spinner"></div>
+
+                <p>Fetching the latest weather...</p>
+
+            </div>
+
+
+            <!-- Current weather -->
+
             {% if weather %}
 
             <div class="weather-result">
 
-                <p class="location">📍 {{ weather.city }}</p>
+                <p class="location">
+                    📍 {{ weather.city }}
+                </p>
 
 
                 <div class="main-weather">
@@ -67,18 +115,26 @@
                 </div>
 
 
+                <!-- Weather details -->
+
                 <div class="weather-details">
 
                     <div class="detail-card">
 
-                        <span class="detail-icon">🌡️</span>
+                        <span class="detail-icon">
+                            🌡️
+                        </span>
 
                         <div>
-                            <p class="detail-label">Feels like</p>
+
+                            <p class="detail-label">
+                                Feels like
+                            </p>
 
                             <p class="detail-value">
                                 {{ weather.feels_like }}°C
                             </p>
+
                         </div>
 
                     </div>
@@ -86,14 +142,20 @@
 
                     <div class="detail-card">
 
-                        <span class="detail-icon">💧</span>
+                        <span class="detail-icon">
+                            💧
+                        </span>
 
                         <div>
-                            <p class="detail-label">Humidity</p>
+
+                            <p class="detail-label">
+                                Humidity
+                            </p>
 
                             <p class="detail-value">
                                 {{ weather.humidity }}%
                             </p>
+
                         </div>
 
                     </div>
@@ -101,14 +163,20 @@
 
                     <div class="detail-card">
 
-                        <span class="detail-icon">💨</span>
+                        <span class="detail-icon">
+                            💨
+                        </span>
 
                         <div>
-                            <p class="detail-label">Wind speed</p>
+
+                            <p class="detail-label">
+                                Wind speed
+                            </p>
 
                             <p class="detail-value">
                                 {{ weather.wind_speed }} m/s
                             </p>
+
                         </div>
 
                     </div>
@@ -117,8 +185,54 @@
 
             </div>
 
+
+            <!-- Forecast -->
+
+            {% if forecast %}
+
+            <div class="forecast-section">
+
+                <h2 class="forecast-title">
+                    5-Day Forecast
+                </h2>
+
+
+                <div class="forecast-container">
+
+                    {% for day in forecast %}
+
+                    <div class="forecast-card">
+
+                        <p class="forecast-date">
+                            {{ day.date }}
+                        </p>
+
+                        <div class="forecast-icon">
+                            {{ day.icon }}
+                        </div>
+
+                        <p class="forecast-temp">
+                            {{ day.temperature }}°C
+                        </p>
+
+                        <p class="forecast-description">
+                            {{ day.description }}
+                        </p>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
             {% endif %}
 
+            {% endif %}
+
+
+            <!-- Error message -->
 
             {% if error %}
 
@@ -131,6 +245,30 @@
         </div>
 
     </main>
+
+
+    <!-- Loading JavaScript -->
+
+    <script>
+
+        const form = document.getElementById("search-form");
+
+        const loading = document.getElementById("loading");
+
+        const button = document.getElementById("search-button");
+
+
+        form.addEventListener("submit", function () {
+
+            loading.classList.add("show");
+
+            button.disabled = true;
+
+            button.textContent = "Searching...";
+
+        });
+
+    </script>
 
 </body>
 
