@@ -2,6 +2,10 @@
 
 Weatherly is a responsive weather web application built with Python and Flask. It provides current weather conditions, a 5-day forecast, temperature trends, persistent search history, and location-based weather information.
 
+## Live Demo
+
+[Try Weatherly](https://weather-app-proj-eta.vercel.app/)
+
 ## Features
 
 - 🌤️ Current weather information
