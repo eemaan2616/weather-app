@@ -25,13 +25,15 @@ body {
 
     padding: 20px;
 
-    transition: background 0.8s ease;
+    transition:
+        background 0.8s ease,
+        color 0.3s ease;
 
 }
 
 
 /* ---------------------------------------------
-   Dynamic weather backgrounds
+   Dynamic Weather Backgrounds
    --------------------------------------------- */
 
 body.weather-clear {
@@ -114,7 +116,7 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Main container
+   Main Container
    --------------------------------------------- */
 
 .container {
@@ -127,7 +129,7 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Weather card
+   Weather Card
    --------------------------------------------- */
 
 .weather-card {
@@ -158,6 +160,11 @@ body.weather-haze {
         0 15px 40px
         rgba(0, 0, 0, 0.2);
 
+    transition:
+        background 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease;
+
 }
 
 
@@ -167,9 +174,18 @@ body.weather-haze {
 
 .header {
 
-    text-align: center;
-
     margin-bottom: 30px;
+
+}
+
+
+.header-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
 
 }
 
@@ -180,12 +196,63 @@ body.weather-haze {
 
     margin-bottom: 8px;
 
+    letter-spacing: 0.5px;
+
 }
 
 
 .header p {
 
     opacity: 0.8;
+
+}
+
+
+/* ---------------------------------------------
+   Theme Button
+   --------------------------------------------- */
+
+.theme-button {
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.25);
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.12
+    );
+
+    color: white;
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    font-size: 1.1rem;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease;
+
+}
+
+
+.theme-button:hover {
+
+    transform: rotate(15deg) scale(1.08);
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.22
+    );
 
 }
 
@@ -209,15 +276,40 @@ body.weather-haze {
 
     flex: 1;
 
-    border: none;
+    border: 1px solid
+        rgba(255, 255, 255, 0.25);
 
     outline: none;
 
-    padding: 15px;
+    padding: 15px 16px;
 
     border-radius: 12px;
 
     font-size: 1rem;
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.9
+    );
+
+    color: #222;
+
+    transition:
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+
+}
+
+
+.search-form input:focus {
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 255, 255, 0.25);
+
+    transform: translateY(-1px);
 
 }
 
@@ -226,7 +318,7 @@ body.weather-haze {
 
     border: none;
 
-    padding: 15px 20px;
+    padding: 15px 22px;
 
     border-radius: 12px;
 
@@ -238,14 +330,29 @@ body.weather-haze {
 
     background-color: white;
 
-    transition: 0.3s;
+    color: #222;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
 
 }
 
 
 .search-form button:hover:not(:disabled) {
 
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 8px 18px
+        rgba(0, 0, 0, 0.15);
+
+}
+
+
+.search-form button:active:not(:disabled) {
+
+    transform: translateY(-1px);
 
 }
 
@@ -260,7 +367,7 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Location button
+   Location Button
    --------------------------------------------- */
 
 .location-button {
@@ -289,7 +396,10 @@ body.weather-haze {
         0.12
     );
 
-    transition: 0.3s;
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
 
     margin-bottom: 10px;
 
@@ -302,10 +412,14 @@ body.weather-haze {
         255,
         255,
         255,
-        0.22
+        0.25
     );
 
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 8px 18px
+        rgba(0, 0, 0, 0.1);
 
 }
 
@@ -320,7 +434,7 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Location status
+   Location Status
    --------------------------------------------- */
 
 .location-status {
@@ -339,7 +453,7 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Recent searches
+   Recent Searches
    --------------------------------------------- */
 
 .recent-searches {
@@ -385,15 +499,17 @@ body.weather-haze {
     );
 
     border: 1px solid
-        rgba(255, 255, 255, 0.15);
+        rgba(255, 255, 255, 0.18);
 
-    padding: 7px 12px;
+    padding: 8px 13px;
 
     border-radius: 20px;
 
     font-size: 0.8rem;
 
-    transition: 0.3s;
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
 
 }
 
@@ -453,7 +569,8 @@ body.weather-haze {
 
     border-radius: 50%;
 
-    animation: spin 0.8s linear infinite;
+    animation:
+        spin 0.8s linear infinite;
 
 }
 
@@ -470,7 +587,7 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Current weather
+   Current Weather
    --------------------------------------------- */
 
 .weather-result {
@@ -497,14 +614,26 @@ body.weather-haze {
 
     align-items: center;
 
-    gap: 20px;
+    gap: 24px;
+
+    margin-top: 5px;
 
 }
 
 
 .weather-icon {
 
-    font-size: 5rem;
+    font-size: 5.2rem;
+
+    transition:
+        transform 0.3s ease;
+
+}
+
+
+.weather-icon:hover {
+
+    transform: scale(1.08);
 
 }
 
@@ -528,7 +657,7 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Temperature toggle
+   Temperature Toggle
    --------------------------------------------- */
 
 .unit-toggle {
@@ -595,7 +724,7 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Weather detail cards
+   Weather Detail Cards
    --------------------------------------------- */
 
 .weather-details {
@@ -605,7 +734,7 @@ body.weather-haze {
     grid-template-columns:
         repeat(3, 1fr);
 
-    gap: 12px;
+    gap: 15px;
 
     margin-top: 30px;
 
@@ -621,9 +750,9 @@ body.weather-haze {
         0.15
     );
 
-    padding: 15px 10px;
+    padding: 18px 12px;
 
-    border-radius: 15px;
+    border-radius: 16px;
 
     display: flex;
 
@@ -631,14 +760,27 @@ body.weather-haze {
 
     align-items: center;
 
-    transition: 0.3s;
+    justify-content: center;
+
+    min-height: 105px;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease;
 
 }
 
 
 .detail-card:hover {
 
-    transform: translateY(-4px);
+    transform: translateY(-5px);
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.22
+    );
 
 }
 
@@ -673,6 +815,82 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
+   Sunrise / Sunset
+   --------------------------------------------- */
+
+.sun-times {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 12px;
+
+    margin-top: 12px;
+
+}
+
+
+.sun-card {
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.15
+    );
+
+    padding: 18px;
+
+    border-radius: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    min-height: 80px;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease;
+
+}
+
+
+.sun-card:hover {
+
+    transform: translateY(-5px);
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.22
+    );
+
+}
+
+
+.sun-icon {
+
+    font-size: 1.5rem;
+
+}
+
+
+.sun-card .detail-label {
+
+    margin-bottom: 5px;
+
+}
+
+
+/* ---------------------------------------------
    Forecast
    --------------------------------------------- */
 
@@ -692,9 +910,11 @@ body.weather-haze {
 
     text-align: center;
 
-    font-size: 1.5rem;
+    font-size: 1.6rem;
 
-    margin-bottom: 20px;
+    margin-bottom: 22px;
+
+    letter-spacing: 0.3px;
 
 }
 
@@ -721,29 +941,36 @@ body.weather-haze {
     );
 
     border: 1px solid
-        rgba(255, 255, 255, 0.15);
+        rgba(255, 255, 255, 0.18);
 
-    border-radius: 16px;
+    border-radius: 18px;
 
-    padding: 15px 8px;
+    padding: 18px 10px;
 
     text-align: center;
 
-    transition: 0.3s;
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
 
 }
 
 
 .forecast-card:hover {
 
-    transform: translateY(-5px);
+    transform: translateY(-6px);
 
     background: rgba(
         255,
         255,
         255,
-        0.2
+        0.22
     );
+
+    box-shadow:
+        0 10px 25px
+        rgba(0, 0, 0, 0.12);
 
 }
 
@@ -761,9 +988,19 @@ body.weather-haze {
 
 .forecast-icon {
 
-    font-size: 2rem;
+    font-size: 2.4rem;
 
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+
+    transition:
+        transform 0.25s ease;
+
+}
+
+
+.forecast-card:hover .forecast-icon {
+
+    transform: scale(1.1);
 
 }
 
@@ -813,289 +1050,6 @@ body.weather-haze {
 
 
 /* ---------------------------------------------
-   Error
-   --------------------------------------------- */
-
-.error {
-
-    text-align: center;
-
-    background: rgba(
-        255,
-        255,
-        255,
-        0.15
-    );
-
-    padding: 15px;
-
-    border-radius: 12px;
-
-    margin-top: 20px;
-
-}
-
-
-/* ---------------------------------------------
-   Responsive design
-   --------------------------------------------- */
-
-@media (max-width: 600px) {
-
-    .weather-card {
-
-        padding: 25px 20px;
-
-    }
-
-
-    .search-form {
-
-        flex-direction: column;
-
-    }
-
-
-    .weather-details {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .forecast-container {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-    }
-
-}
-
-
-@media (max-width: 400px) {
-
-    .forecast-container {
-
-        grid-template-columns: 1fr;
-
-    }
-
-}
-
-/* ---------------------------------------------
-   Dark text for light weather backgrounds
-   --------------------------------------------- */
-
-body.weather-clouds,
-body.weather-snow,
-body.weather-mist,
-body.weather-fog,
-body.weather-haze {
-
-    color: #222;
-
-}
-
-
-/* Header */
-
-body.weather-clouds .header h1,
-body.weather-snow .header h1,
-body.weather-mist .header h1,
-body.weather-fog .header h1,
-body.weather-haze .header h1,
-
-body.weather-clouds .header p,
-body.weather-snow .header p,
-body.weather-mist .header p,
-body.weather-fog .header p,
-body.weather-haze .header p {
-
-    color: #222;
-
-}
-
-
-/* Main location */
-
-body.weather-clouds .location,
-body.weather-snow .location,
-body.weather-mist .location,
-body.weather-fog .location,
-body.weather-haze .location {
-
-    color: #222;
-
-}
-
-
-/* Main temperature */
-
-body.weather-clouds .temperature,
-body.weather-snow .temperature,
-body.weather-mist .temperature,
-body.weather-fog .temperature,
-body.weather-haze .temperature {
-
-    color: #222;
-
-}
-
-
-/* Weather description */
-
-body.weather-clouds .description,
-body.weather-snow .description,
-body.weather-mist .description,
-body.weather-fog .description,
-body.weather-haze .description {
-
-    color: #222;
-
-}
-
-
-/* Weather detail cards */
-
-body.weather-clouds .detail-label,
-body.weather-snow .detail-label,
-body.weather-mist .detail-label,
-body.weather-fog .detail-label,
-body.weather-haze .detail-label,
-
-body.weather-clouds .detail-value,
-body.weather-snow .detail-value,
-body.weather-mist .detail-value,
-body.weather-fog .detail-value,
-body.weather-haze .detail-value {
-
-    color: #222;
-
-}
-
-
-/* Forecast */
-
-body.weather-clouds .forecast-title,
-body.weather-snow .forecast-title,
-body.weather-mist .forecast-title,
-body.weather-fog .forecast-title,
-body.weather-haze .forecast-title,
-
-body.weather-clouds .forecast-date,
-body.weather-snow .forecast-date,
-body.weather-mist .forecast-date,
-body.weather-fog .forecast-date,
-body.weather-haze .forecast-date,
-
-body.weather-clouds .forecast-high,
-body.weather-snow .forecast-high,
-body.weather-mist .forecast-high,
-body.weather-fog .forecast-high,
-body.weather-haze .forecast-high,
-
-body.weather-clouds .forecast-low,
-body.weather-snow .forecast-low,
-body.weather-mist .forecast-low,
-body.weather-fog .forecast-low,
-body.weather-haze .forecast-low,
-
-body.weather-clouds .forecast-description,
-body.weather-snow .forecast-description,
-body.weather-mist .forecast-description,
-body.weather-fog .forecast-description,
-body.weather-haze .forecast-description {
-
-    color: #222;
-
-}
-
-
-/* Recent searches */
-
-body.weather-clouds .recent-title,
-body.weather-snow .recent-title,
-body.weather-mist .recent-title,
-body.weather-fog .recent-title,
-body.weather-haze .recent-title,
-
-body.weather-clouds .recent-city,
-body.weather-snow .recent-city,
-body.weather-mist .recent-city,
-body.weather-fog .recent-city,
-body.weather-haze .recent-city {
-
-    color: #222;
-
-}
-
-
-/* Location button */
-
-body.weather-clouds .location-button,
-body.weather-snow .location-button,
-body.weather-mist .location-button,
-body.weather-fog .location-button,
-body.weather-haze .location-button {
-
-    color: #222;
-
-}
-
-
-/* Location status */
-
-body.weather-clouds .location-status,
-body.weather-snow .location-status,
-body.weather-mist .location-status,
-body.weather-fog .location-status,
-body.weather-haze .location-status {
-
-    color: #222;
-
-}
-
-
-/* Temperature toggle */
-
-body.weather-clouds .unit-button,
-body.weather-snow .unit-button,
-body.weather-mist .unit-button,
-body.weather-fog .unit-button,
-body.weather-haze .unit-button {
-
-    color: #222;
-
-}
-
-
-/* Active temperature button */
-
-body.weather-clouds .unit-button.active,
-body.weather-snow .unit-button.active,
-body.weather-mist .unit-button.active,
-body.weather-fog .unit-button.active,
-body.weather-haze .unit-button.active {
-
-    color: #667eea;
-
-}
-
-
-/* Error message */
-
-body.weather-clouds .error,
-body.weather-snow .error,
-body.weather-mist .error,
-body.weather-fog .error,
-body.weather-haze .error {
-
-    color: #222;
-
-}
-
-/* ---------------------------------------------
    Temperature Chart
    --------------------------------------------- */
 
@@ -1126,7 +1080,7 @@ body.weather-haze .error {
 
     position: relative;
 
-    height: 300px;
+    height: 320px;
 
     width: 100%;
 
@@ -1137,30 +1091,26 @@ body.weather-haze .error {
         0.08
     );
 
-    border-radius: 16px;
+    border: 1px solid
+        rgba(255, 255, 255, 0.15);
 
-    padding: 15px;
+    border-radius: 18px;
+
+    padding: 20px;
+
+    transition:
+        background 0.3s ease;
 
 }
+
 
 /* ---------------------------------------------
-   Sunrise / Sunset
+   Error
    --------------------------------------------- */
 
-.sun-times {
+.error {
 
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 12px;
-
-    margin-top: 12px;
-
-}
-
-
-.sun-card {
+    text-align: center;
 
     background: rgba(
         255,
@@ -1171,38 +1121,274 @@ body.weather-haze .error {
 
     padding: 15px;
 
-    border-radius: 15px;
+    border-radius: 12px;
 
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 10px;
+    margin-top: 20px;
 
 }
 
 
-.sun-icon {
+/* ---------------------------------------------
+   LIGHT MODE
+   --------------------------------------------- */
 
-    font-size: 1.5rem;
+body.light-mode {
+
+    background:
+        linear-gradient(
+            135deg,
+            #f5f7fa,
+            #c3cfe2
+        );
+
+    color: #222;
 
 }
 
 
-.sun-card .detail-label {
+body.light-mode .weather-card {
 
-    margin-bottom: 5px;
+    background: rgba(
+        255,
+        255,
+        255,
+        0.65
+    );
+
+    border-color: rgba(
+        0,
+        0,
+        0,
+        0.12
+    );
+
+    color: #222;
 
 }
 
+
+body.light-mode .header h1,
+body.light-mode .header p,
+body.light-mode .location,
+body.light-mode .temperature,
+body.light-mode .description,
+body.light-mode .forecast-title,
+body.light-mode .forecast-date,
+body.light-mode .forecast-high,
+body.light-mode .forecast-low,
+body.light-mode .forecast-description,
+body.light-mode .detail-label,
+body.light-mode .detail-value,
+body.light-mode .recent-title,
+body.light-mode .location-status,
+body.light-mode .chart-title {
+
+    color: #222;
+
+}
+
+
+body.light-mode .location-button,
+body.light-mode .unit-button,
+body.light-mode .recent-city,
+body.light-mode .theme-button {
+
+    color: #222;
+
+    border-color: rgba(
+        0,
+        0,
+        0,
+        0.15
+    );
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.4
+    );
+
+}
+
+
+body.light-mode .unit-button.active {
+
+    background: #222;
+
+    color: white;
+
+}
+
+
+body.light-mode .detail-card,
+body.light-mode .sun-card,
+body.light-mode .forecast-card {
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.45
+    );
+
+    border-color: rgba(
+        0,
+        0,
+        0,
+        0.1
+    );
+
+}
+
+
+body.light-mode .detail-card:hover,
+body.light-mode .sun-card:hover,
+body.light-mode .forecast-card:hover {
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.7
+    );
+
+}
+
+
+body.light-mode .chart-container {
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.35
+    );
+
+    border-color: rgba(
+        0,
+        0,
+        0,
+        0.1
+    );
+
+}
+
+
+body.light-mode .forecast-section,
+body.light-mode .chart-section {
+
+    border-color: rgba(
+        0,
+        0,
+        0,
+        0.15
+    );
+
+}
+
+
+body.light-mode .error {
+
+    color: #222;
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.45
+    );
+
+}
+
+
+/* ---------------------------------------------
+   Responsive Design
+   --------------------------------------------- */
 
 @media (max-width: 600px) {
 
+    .weather-card {
+
+        padding: 25px 20px;
+
+    }
+
+
+    .search-form {
+
+        flex-direction: column;
+
+    }
+
+
+    .weather-details {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+        gap: 10px;
+
+    }
+
+
+    .forecast-container {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+        gap: 10px;
+
+    }
+
+
+    .chart-container {
+
+        height: 260px;
+
+        padding: 12px;
+
+    }
+
+
     .sun-times {
 
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .header-top {
+
+        align-items: center;
+
+    }
+
+
+    .header h1 {
+
+        font-size: 2.2rem;
+
+    }
+
+}
+
+
+@media (max-width: 400px) {
+
+    .forecast-container {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .weather-details {
+
+        grid-template-columns:
+            1fr;
 
     }
 

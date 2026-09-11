@@ -29,13 +29,32 @@
 
             <div class="header">
 
-                <h1>
-                    Weatherly
-                </h1>
+                <div class="header-top">
 
-                <p>
-                    Check the weather anywhere
-                </p>
+                    <div>
+
+                        <h1>
+                            Weatherly
+                        </h1>
+
+                        <p>
+                            Check the weather anywhere
+                        </p>
+
+                    </div>
+
+
+                    <!-- Theme Toggle -->
+
+                    <button
+                        type="button"
+                        class="theme-button"
+                        id="theme-button"
+                    >
+                        🌙
+                    </button>
+
+                </div>
 
             </div>
 
@@ -202,8 +221,6 @@
                 <div class="weather-details">
 
 
-                    <!-- Feels Like -->
-
                     <div class="detail-card">
 
                         <span class="detail-icon">
@@ -229,8 +246,6 @@
                     </div>
 
 
-                    <!-- Humidity -->
-
                     <div class="detail-card">
 
                         <span class="detail-icon">
@@ -251,8 +266,6 @@
 
                     </div>
 
-
-                    <!-- Wind Speed -->
 
                     <div class="detail-card">
 
@@ -275,8 +288,6 @@
                     </div>
 
 
-                    <!-- Wind Direction -->
-
                     <div class="detail-card">
 
                         <span class="detail-icon">
@@ -297,8 +308,6 @@
 
                     </div>
 
-
-                    <!-- Pressure -->
 
                     <div class="detail-card">
 
@@ -321,8 +330,6 @@
                     </div>
 
 
-                    <!-- Visibility -->
-
                     <div class="detail-card">
 
                         <span class="detail-icon">
@@ -336,11 +343,17 @@
                             </p>
 
                             <p class="detail-value">
+
                                 {% if weather.visibility != "N/A" %}
+
                                     {{ weather.visibility }} km
+
                                 {% else %}
+
                                     N/A
+
                                 {% endif %}
+
                             </p>
 
                         </div>
@@ -505,6 +518,71 @@
 
 
     <script>
+
+
+        // ---------------------------------------------
+        // Theme
+        // ---------------------------------------------
+
+        const themeButton =
+            document.getElementById("theme-button");
+
+
+        const savedTheme =
+            localStorage.getItem("weatherly-theme");
+
+
+        if (savedTheme === "light") {
+
+            document.body.classList.add("light-mode");
+
+            themeButton.textContent = "☀️";
+
+        }
+
+
+        themeButton.addEventListener(
+            "click",
+            function () {
+
+                document.body.classList.toggle(
+                    "light-mode"
+                );
+
+
+                const isLight =
+                    document.body.classList.contains(
+                        "light-mode"
+                    );
+
+
+                if (isLight) {
+
+                    localStorage.setItem(
+                        "weatherly-theme",
+                        "light"
+                    );
+
+                    themeButton.textContent = "☀️";
+
+                }
+
+                else {
+
+                    localStorage.setItem(
+                        "weatherly-theme",
+                        "dark"
+                    );
+
+                    themeButton.textContent = "🌙";
+
+                }
+
+
+                updateChartTheme();
+
+            }
+        );
 
 
         // ---------------------------------------------
@@ -817,22 +895,6 @@
                 );
 
 
-            const chartTextColor =
-                document.body.classList.contains("weather-clouds") ||
-                document.body.classList.contains("weather-snow") ||
-                document.body.classList.contains("weather-mist") ||
-                document.body.classList.contains("weather-fog") ||
-                document.body.classList.contains("weather-haze")
-                    ? "#222"
-                    : "white";
-
-
-            const chartGridColor =
-                chartTextColor === "#222"
-                    ? "rgba(0,0,0,0.15)"
-                    : "rgba(255,255,255,0.15)";
-
-
             window.temperatureChart =
                 new Chart(
                     chartCanvas,
@@ -898,7 +960,7 @@
                                     labels: {
 
                                         color:
-                                            chartTextColor
+                                            getChartTextColor()
 
                                     }
 
@@ -914,7 +976,7 @@
                                     ticks: {
 
                                         color:
-                                            chartTextColor
+                                            getChartTextColor()
 
                                     },
 
@@ -922,7 +984,7 @@
                                     grid: {
 
                                         color:
-                                            chartGridColor
+                                            getChartGridColor()
 
                                     }
 
@@ -934,7 +996,7 @@
                                     ticks: {
 
                                         color:
-                                            chartTextColor,
+                                            getChartTextColor(),
 
 
                                         callback:
@@ -950,7 +1012,7 @@
                                     grid: {
 
                                         color:
-                                            chartGridColor
+                                            getChartGridColor()
 
                                     }
 
@@ -963,6 +1025,74 @@
                     }
 
                 );
+
+        }
+
+
+        // ---------------------------------------------
+        // Chart Theme
+        // ---------------------------------------------
+
+        function getChartTextColor() {
+
+            return document.body.classList.contains(
+                "light-mode"
+            )
+                ? "#222"
+                : "white";
+
+        }
+
+
+        function getChartGridColor() {
+
+            return document.body.classList.contains(
+                "light-mode"
+            )
+                ? "rgba(0,0,0,0.15)"
+                : "rgba(255,255,255,0.15)";
+
+        }
+
+
+        function updateChartTheme() {
+
+            if (!window.temperatureChart) {
+
+                return;
+
+            }
+
+
+            const textColor =
+                getChartTextColor();
+
+
+            const gridColor =
+                getChartGridColor();
+
+
+            window.temperatureChart.options.plugins.legend.labels.color =
+                textColor;
+
+
+            window.temperatureChart.options.scales.x.ticks.color =
+                textColor;
+
+
+            window.temperatureChart.options.scales.y.ticks.color =
+                textColor;
+
+
+            window.temperatureChart.options.scales.x.grid.color =
+                gridColor;
+
+
+            window.temperatureChart.options.scales.y.grid.color =
+                gridColor;
+
+
+            window.temperatureChart.update();
 
         }
 
