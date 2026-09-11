@@ -13,21 +13,34 @@ app = Flask(__name__)
 API_KEY = os.getenv("WEATHER_API_KEY")
 
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+
 FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast"
+
+GEOCODING_URL = "https://api.openweathermap.org/geo/1.0/direct"
 
 DATABASE = "weather.db"
 
 
 WEATHER_ICONS = {
+
     "Clear": "☀️",
+
     "Clouds": "☁️",
+
     "Rain": "🌧️",
+
     "Drizzle": "🌦️",
+
     "Thunderstorm": "⛈️",
+
     "Snow": "❄️",
+
     "Mist": "🌫️",
+
     "Fog": "🌫️",
+
     "Haze": "🌫️"
+
 }
 
 
@@ -50,9 +63,14 @@ def init_database():
 
     connection.execute("""
         CREATE TABLE IF NOT EXISTS recent_searches (
+
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+
             city TEXT UNIQUE NOT NULL,
-            searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+            searched_at TIMESTAMP
+                DEFAULT CURRENT_TIMESTAMP
+
         )
     """)
 
@@ -77,11 +95,17 @@ def add_recent_search(city):
 
     connection.execute("""
         DELETE FROM recent_searches
+
         WHERE id NOT IN (
+
             SELECT id
+
             FROM recent_searches
+
             ORDER BY searched_at DESC, id DESC
+
             LIMIT 5
+
         )
     """)
 
@@ -96,51 +120,175 @@ def get_recent_searches():
 
     rows = connection.execute("""
         SELECT city
+
         FROM recent_searches
+
         ORDER BY searched_at DESC, id DESC
+
         LIMIT 5
     """).fetchall()
 
     connection.close()
 
-    return [row["city"] for row in rows]
+    return [
+        row["city"]
+        for row in rows
+    ]
+
+
+# ------------------------------------------------
+# GEOCODING
+# ------------------------------------------------
+
+def get_coordinates(city):
+
+    params = {
+
+        "q": city,
+
+        "limit": 1,
+
+        "appid": API_KEY
+
+    }
+
+
+    response = requests.get(
+
+        GEOCODING_URL,
+
+        params=params,
+
+        timeout=10
+
+    )
+
+
+    if response.status_code == 401:
+
+        return None, None, None, (
+            "There is a problem with the weather API key."
+        )
+
+
+    response.raise_for_status()
+
+    locations = response.json()
+
+
+    if not locations:
+
+        return None, None, None, (
+            f'We could not find "{city}". '
+            "Please check the spelling."
+        )
+
+
+    location = locations[0]
+
+
+    latitude = location["lat"]
+
+    longitude = location["lon"]
+
+    location_name = location["name"]
+
+    country = location.get(
+        "country",
+        ""
+    )
+
+
+    return (
+        latitude,
+        longitude,
+        {
+            "name": location_name,
+            "country": country
+        },
+        None
+    )
 
 
 # ------------------------------------------------
 # WEATHER
 # ------------------------------------------------
 
-def get_weather(city=None, latitude=None, longitude=None):
-
-    params = {
-        "appid": API_KEY,
-        "units": "metric"
-    }
-
-    if city:
-
-        params["q"] = city
-
-    elif latitude is not None and longitude is not None:
-
-        params["lat"] = latitude
-        params["lon"] = longitude
-
-    else:
-
-        return None, [], "No location was provided."
-
+def get_weather(
+    city=None,
+    latitude=None,
+    longitude=None
+):
 
     try:
+
+        # ------------------------------------------------
+        # CITY SEARCH
+        # ------------------------------------------------
+
+        location_info = None
+
+
+        if city:
+
+            (
+                latitude,
+                longitude,
+                location_info,
+                error
+            ) = get_coordinates(city)
+
+
+            if error:
+
+                return None, [], error
+
+
+        elif latitude is not None and longitude is not None:
+
+            latitude = float(latitude)
+
+            longitude = float(longitude)
+
+
+        else:
+
+            return (
+                None,
+                [],
+                "No location was provided."
+            )
+
+
+        # ------------------------------------------------
+        # WEATHER API PARAMETERS
+        # ------------------------------------------------
+
+        params = {
+
+            "appid": API_KEY,
+
+            "units": "metric",
+
+            "lat": latitude,
+
+            "lon": longitude
+
+        }
+
 
         # ------------------------------------------------
         # CURRENT WEATHER
         # ------------------------------------------------
 
         response = requests.get(
+
             BASE_URL,
+
             params=params,
+
             timeout=10
+
         )
 
 
@@ -149,7 +297,7 @@ def get_weather(city=None, latitude=None, longitude=None):
             return (
                 None,
                 [],
-                f'We could not find "{city}". Please check the spelling.'
+                "Weather data could not be found."
             )
 
 
@@ -166,6 +314,7 @@ def get_weather(city=None, latitude=None, longitude=None):
 
         data = response.json()
 
+
         condition = data["weather"][0]["main"]
 
 
@@ -177,13 +326,27 @@ def get_weather(city=None, latitude=None, longitude=None):
 
         sunset_timestamp = data["sys"]["sunset"]
 
+
         sunrise = datetime.fromtimestamp(
+
             sunrise_timestamp
-        ).strftime("%I:%M %p").lstrip("0")
+
+        ).strftime(
+
+            "%I:%M %p"
+
+        ).lstrip("0")
+
 
         sunset = datetime.fromtimestamp(
+
             sunset_timestamp
-        ).strftime("%I:%M %p").lstrip("0")
+
+        ).strftime(
+
+            "%I:%M %p"
+
+        ).lstrip("0")
 
 
         # ------------------------------------------------
@@ -196,22 +359,37 @@ def get_weather(city=None, latitude=None, longitude=None):
         if wind_direction is not None:
 
             directions = [
+
                 "N",
+
                 "NE",
+
                 "E",
+
                 "SE",
+
                 "S",
+
                 "SW",
+
                 "W",
+
                 "NW"
+
             ]
 
+
             direction_index = round(
+
                 wind_direction / 45
+
             ) % 8
 
+
             wind_direction_label = directions[
+
                 direction_index
+
             ]
 
         else:
@@ -231,8 +409,11 @@ def get_weather(city=None, latitude=None, longitude=None):
         if visibility_meters is not None:
 
             visibility_km = round(
+
                 visibility_meters / 1000,
+
                 1
+
             )
 
         else:
@@ -241,46 +422,78 @@ def get_weather(city=None, latitude=None, longitude=None):
 
 
         # ------------------------------------------------
+        # CITY / COUNTRY
+        # ------------------------------------------------
+
+        actual_city = data["name"]
+
+        actual_country = data["sys"].get(
+            "country",
+            ""
+        )
+
+
+        # ------------------------------------------------
         # CURRENT WEATHER DATA
         # ------------------------------------------------
 
         weather = {
 
-            "city": data["name"],
+            "city": actual_city,
+
+            "country": actual_country,
 
             "temperature": round(
+
                 data["main"]["temp"]
+
             ),
 
             "feels_like": round(
+
                 data["main"]["feels_like"]
+
             ),
 
             "humidity": data["main"]["humidity"],
 
             "wind_speed": round(
+
                 data["wind"]["speed"],
+
                 1
+
             ),
 
-            "wind_direction": wind_direction_label,
+            "wind_direction":
+                wind_direction_label,
 
-            "pressure": data["main"]["pressure"],
+            "pressure":
+                data["main"]["pressure"],
 
-            "visibility": visibility_km,
+            "visibility":
+                visibility_km,
 
-            "sunrise": sunrise,
+            "sunrise":
+                sunrise,
 
-            "sunset": sunset,
+            "sunset":
+                sunset,
 
-            "description": data["weather"][0]["description"],
+            "description":
+                data["weather"][0]["description"],
 
-            "condition": condition,
-
-            "icon": WEATHER_ICONS.get(
+            "condition":
                 condition,
-                "🌤️"
-            )
+
+            "icon":
+                WEATHER_ICONS.get(
+
+                    condition,
+
+                    "🌤️"
+
+                )
 
         }
 
@@ -290,29 +503,45 @@ def get_weather(city=None, latitude=None, longitude=None):
         # ------------------------------------------------
 
         forecast_response = requests.get(
+
             FORECAST_URL,
+
             params=params,
+
             timeout=10
+
         )
+
 
         forecast = []
 
 
         if forecast_response.status_code == 200:
 
-            forecast_data = forecast_response.json()
+            forecast_data = (
+                forecast_response.json()
+            )
+
 
             daily_data = {}
 
 
             for item in forecast_data["list"]:
 
-                date_string = item["dt_txt"].split(" ")[0]
+                date_string = (
+                    item["dt_txt"].split(" ")[0]
+                )
 
-                forecast_date = datetime.strptime(
-                    date_string,
-                    "%Y-%m-%d"
-                ).date()
+
+                forecast_date = (
+                    datetime.strptime(
+
+                        date_string,
+
+                        "%Y-%m-%d"
+
+                    ).date()
+                )
 
 
                 if forecast_date <= date.today():
@@ -324,7 +553,8 @@ def get_weather(city=None, latitude=None, longitude=None):
 
                     daily_data[date_string] = {
 
-                        "date": forecast_date,
+                        "date":
+                            forecast_date,
 
                         "temperatures": [],
 
@@ -335,89 +565,133 @@ def get_weather(city=None, latitude=None, longitude=None):
                     }
 
 
-                daily_data[date_string]["temperatures"].append(
+                daily_data[
+                    date_string
+                ]["temperatures"].append(
+
                     item["main"]["temp"]
+
                 )
 
 
-                daily_data[date_string]["descriptions"].append(
+                daily_data[
+                    date_string
+                ]["descriptions"].append(
+
                     item["weather"][0]["description"]
+
                 )
 
 
-                daily_data[date_string]["conditions"].append(
+                daily_data[
+                    date_string
+                ]["conditions"].append(
+
                     item["weather"][0]["main"]
+
                 )
 
 
             sorted_days = sorted(
+
                 daily_data.values(),
-                key=lambda day: day["date"]
+
+                key=lambda day:
+                    day["date"]
+
             )
 
 
             for day_data in sorted_days[:5]:
 
-                forecast_date = day_data["date"]
+                forecast_date = (
+                    day_data["date"]
+                )
 
 
-                if forecast_date == date.today() + timedelta(days=1):
+                if forecast_date == (
+                    date.today()
+                    + timedelta(days=1)
+                ):
 
                     display_date = "Tomorrow"
 
                 else:
 
-                    display_date = forecast_date.strftime(
-                        "%A"
+                    display_date = (
+                        forecast_date.strftime(
+                            "%A"
+                        )
                     )
 
 
                 high_temperature = max(
+
                     day_data["temperatures"]
+
                 )
 
 
                 low_temperature = min(
+
                     day_data["temperatures"]
+
                 )
 
 
-                conditions = day_data["conditions"]
+                conditions = (
+                    day_data["conditions"]
+                )
+
 
                 most_common_condition = max(
+
                     set(conditions),
+
                     key=conditions.count
+
                 )
 
 
-                descriptions = day_data["descriptions"]
+                descriptions = (
+                    day_data["descriptions"]
+                )
+
 
                 most_common_description = max(
+
                     set(descriptions),
+
                     key=descriptions.count
+
                 )
 
 
                 forecast.append({
 
-                    "date": display_date,
+                    "date":
+                        display_date,
 
-                    "high": round(
-                        high_temperature
-                    ),
+                    "high":
+                        round(high_temperature),
 
-                    "low": round(
-                        low_temperature
-                    ),
+                    "low":
+                        round(low_temperature),
 
-                    "description": most_common_description,
+                    "description":
+                        most_common_description,
 
-                    "condition": most_common_condition,
-
-                    "icon": WEATHER_ICONS.get(
+                    "condition":
                         most_common_condition,
-                        "🌤️"
-                    )
+
+                    "icon":
+                        WEATHER_ICONS.get(
+
+                            most_common_condition,
+
+                            "🌤️"
+
+                        )
 
                 })
 
@@ -428,27 +702,39 @@ def get_weather(city=None, latitude=None, longitude=None):
     except requests.exceptions.Timeout:
 
         return (
+
             None,
+
             [],
+
             "The weather service took too long to respond."
+
         )
 
 
     except requests.exceptions.ConnectionError:
 
         return (
+
             None,
+
             [],
+
             "Could not connect to the weather service."
+
         )
 
 
     except requests.exceptions.RequestException:
 
         return (
+
             None,
+
             [],
+
             "Something went wrong while fetching the weather."
+
         )
 
 
@@ -460,31 +746,42 @@ def get_weather(city=None, latitude=None, longitude=None):
 def home():
 
     city = request.args.get(
+
         "city",
+
         ""
+
     ).strip()
 
 
     weather = None
+
     forecast = []
+
     error = None
 
 
     if city:
 
         weather, forecast, error = get_weather(
+
             city=city
+
         )
 
 
         if weather:
 
             add_recent_search(
+
                 weather["city"]
+
             )
 
 
-    recent_searches = get_recent_searches()
+    recent_searches = (
+        get_recent_searches()
+    )
 
 
     return render_template(
@@ -528,9 +825,11 @@ def location():
 
             forecast=[],
 
-            recent_searches=get_recent_searches(),
+            recent_searches=
+                get_recent_searches(),
 
-            error="Could not determine your location."
+            error=
+                "Could not determine your location."
 
         )
 
@@ -547,7 +846,9 @@ def location():
     if weather:
 
         add_recent_search(
+
             weather["city"]
+
         )
 
 
@@ -561,7 +862,8 @@ def location():
 
         forecast=forecast,
 
-        recent_searches=get_recent_searches(),
+        recent_searches=
+            get_recent_searches(),
 
         error=error
 
