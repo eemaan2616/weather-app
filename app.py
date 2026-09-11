@@ -65,7 +65,6 @@ def add_recent_search(city):
 
     connection = get_db_connection()
 
-    # Remove the city first so it can become the newest search
     connection.execute(
         "DELETE FROM recent_searches WHERE city = ?",
         (city,)
@@ -76,7 +75,6 @@ def add_recent_search(city):
         (city,)
     )
 
-    # Keep only the 5 most recent searches
     connection.execute("""
         DELETE FROM recent_searches
         WHERE id NOT IN (
@@ -171,6 +169,81 @@ def get_weather(city=None, latitude=None, longitude=None):
         condition = data["weather"][0]["main"]
 
 
+        # ------------------------------------------------
+        # SUNRISE / SUNSET
+        # ------------------------------------------------
+
+        sunrise_timestamp = data["sys"]["sunrise"]
+
+        sunset_timestamp = data["sys"]["sunset"]
+
+        sunrise = datetime.fromtimestamp(
+            sunrise_timestamp
+        ).strftime("%I:%M %p").lstrip("0")
+
+        sunset = datetime.fromtimestamp(
+            sunset_timestamp
+        ).strftime("%I:%M %p").lstrip("0")
+
+
+        # ------------------------------------------------
+        # WIND DIRECTION
+        # ------------------------------------------------
+
+        wind_direction = data["wind"].get("deg")
+
+
+        if wind_direction is not None:
+
+            directions = [
+                "N",
+                "NE",
+                "E",
+                "SE",
+                "S",
+                "SW",
+                "W",
+                "NW"
+            ]
+
+            direction_index = round(
+                wind_direction / 45
+            ) % 8
+
+            wind_direction_label = directions[
+                direction_index
+            ]
+
+        else:
+
+            wind_direction_label = "N/A"
+
+
+        # ------------------------------------------------
+        # VISIBILITY
+        # ------------------------------------------------
+
+        visibility_meters = data.get(
+            "visibility"
+        )
+
+
+        if visibility_meters is not None:
+
+            visibility_km = round(
+                visibility_meters / 1000,
+                1
+            )
+
+        else:
+
+            visibility_km = "N/A"
+
+
+        # ------------------------------------------------
+        # CURRENT WEATHER DATA
+        # ------------------------------------------------
+
         weather = {
 
             "city": data["name"],
@@ -189,6 +262,16 @@ def get_weather(city=None, latitude=None, longitude=None):
                 data["wind"]["speed"],
                 1
             ),
+
+            "wind_direction": wind_direction_label,
+
+            "pressure": data["main"]["pressure"],
+
+            "visibility": visibility_km,
+
+            "sunrise": sunrise,
+
+            "sunset": sunset,
 
             "description": data["weather"][0]["description"],
 
@@ -232,8 +315,8 @@ def get_weather(city=None, latitude=None, longitude=None):
                 ).date()
 
 
-                # Ignore today
                 if forecast_date <= date.today():
+
                     continue
 
 
@@ -429,6 +512,7 @@ def home():
 def location():
 
     latitude = request.args.get("lat")
+
     longitude = request.args.get("lon")
 
 

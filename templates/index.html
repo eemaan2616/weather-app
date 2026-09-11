@@ -13,7 +13,6 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
@@ -211,13 +210,11 @@
                             🌡️
                         </span>
 
-
                         <div>
 
                             <p class="detail-label">
                                 Feels like
                             </p>
-
 
                             <p
                                 class="detail-value"
@@ -240,13 +237,11 @@
                             💧
                         </span>
 
-
                         <div>
 
                             <p class="detail-label">
                                 Humidity
                             </p>
-
 
                             <p class="detail-value">
                                 {{ weather.humidity }}%
@@ -257,7 +252,7 @@
                     </div>
 
 
-                    <!-- Wind -->
+                    <!-- Wind Speed -->
 
                     <div class="detail-card">
 
@@ -265,13 +260,11 @@
                             💨
                         </span>
 
-
                         <div>
 
                             <p class="detail-label">
                                 Wind speed
                             </p>
-
 
                             <p class="detail-value">
                                 {{ weather.wind_speed }} m/s
@@ -282,7 +275,131 @@
                     </div>
 
 
+                    <!-- Wind Direction -->
+
+                    <div class="detail-card">
+
+                        <span class="detail-icon">
+                            🧭
+                        </span>
+
+                        <div>
+
+                            <p class="detail-label">
+                                Wind direction
+                            </p>
+
+                            <p class="detail-value">
+                                {{ weather.wind_direction }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Pressure -->
+
+                    <div class="detail-card">
+
+                        <span class="detail-icon">
+                            🔽
+                        </span>
+
+                        <div>
+
+                            <p class="detail-label">
+                                Pressure
+                            </p>
+
+                            <p class="detail-value">
+                                {{ weather.pressure }} hPa
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Visibility -->
+
+                    <div class="detail-card">
+
+                        <span class="detail-icon">
+                            👁️
+                        </span>
+
+                        <div>
+
+                            <p class="detail-label">
+                                Visibility
+                            </p>
+
+                            <p class="detail-value">
+                                {% if weather.visibility != "N/A" %}
+                                    {{ weather.visibility }} km
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
                 </div>
+
+
+                <!-- Sunrise / Sunset -->
+
+                <div class="sun-times">
+
+
+                    <div class="sun-card">
+
+                        <span class="sun-icon">
+                            🌅
+                        </span>
+
+                        <div>
+
+                            <p class="detail-label">
+                                Sunrise
+                            </p>
+
+                            <p class="detail-value">
+                                {{ weather.sunrise }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="sun-card">
+
+                        <span class="sun-icon">
+                            🌇
+                        </span>
+
+                        <div>
+
+                            <p class="detail-label">
+                                Sunset
+                            </p>
+
+                            <p class="detail-value">
+                                {{ weather.sunset }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
 
             </div>
 
@@ -586,8 +703,6 @@
             );
 
 
-            // Update chart too
-
             if (window.temperatureChart) {
 
                 updateChartUnit(unit);
@@ -701,6 +816,7 @@
                     }
                 );
 
+
             const chartTextColor =
                 document.body.classList.contains("weather-clouds") ||
                 document.body.classList.contains("weather-snow") ||
@@ -709,7 +825,15 @@
                 document.body.classList.contains("weather-haze")
                     ? "#222"
                     : "white";
-                window.temperatureChart =
+
+
+            const chartGridColor =
+                chartTextColor === "#222"
+                    ? "rgba(0,0,0,0.15)"
+                    : "rgba(255,255,255,0.15)";
+
+
+            window.temperatureChart =
                 new Chart(
                     chartCanvas,
                     {
@@ -773,7 +897,8 @@
 
                                     labels: {
 
-                                        color: chartTextColor
+                                        color:
+                                            chartTextColor
 
                                     }
 
@@ -788,17 +913,17 @@
 
                                     ticks: {
 
-                                        color: "white"
+                                        color:
+                                            chartTextColor
 
                                     },
 
 
                                     grid: {
 
-                                        color: chartTextColor === "#222"
-                                             ? "rgba(0,0,0,0.15)"
-                                             : "rgba(255,255,255,0.15)"
-                                            
+                                        color:
+                                            chartGridColor
+
                                     }
 
                                 },
@@ -808,7 +933,8 @@
 
                                     ticks: {
 
-                                        color: "white",
+                                        color:
+                                            chartTextColor,
 
 
                                         callback:
@@ -824,7 +950,7 @@
                                     grid: {
 
                                         color:
-                                            "rgba(255,255,255,0.15)"
+                                            chartGridColor
 
                                     }
 

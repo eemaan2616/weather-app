@@ -1142,3 +1142,68 @@ body.weather-haze .error {
     padding: 15px;
 
 }
+
+/* ---------------------------------------------
+   Sunrise / Sunset
+   --------------------------------------------- */
+
+.sun-times {
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 12px;
+
+    margin-top: 12px;
+
+}
+
+
+.sun-card {
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.15
+    );
+
+    padding: 15px;
+
+    border-radius: 15px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+}
+
+
+.sun-icon {
+
+    font-size: 1.5rem;
+
+}
+
+
+.sun-card .detail-label {
+
+    margin-bottom: 5px;
+
+}
+
+
+@media (max-width: 600px) {
+
+    .sun-times {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
